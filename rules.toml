@@ -1,0 +1,128 @@
+[[rules]]
+name = "find_link_jsx_elements"
+query = """
+(
+    (jsx_element
+        open_tag: (jsx_opening_element
+            name: (identifier) @link_name
+            (#eq? @link_name "Link")
+            attribute: (jsx_attribute
+                (property_identifier) @link_attribute_pi
+                (#not-eq? @link_attribute_pi "legacyBehavior")
+            )* @link_attributes
+        )
+        (jsx_element
+            open_tag: (jsx_opening_element
+                name: (identifier) @a_name
+                (#eq? @a_name "a")
+                attribute: (jsx_attribute
+                    (property_identifier) @a_attribute_pi
+                    (jsx_expression) @a_attribute_je
+                )* @a_attributes
+            )
+            (_)* @a_children
+            close_tag: (jsx_closing_element)
+        )
+    ) @link
+)
+"""
+
+[[rules]]
+name = "find_and_replace_from_next_image"
+query = """
+(
+    (import_statement
+        (import_clause
+            (identifier) @i
+            (#eq? @i "Image")
+        )
+        source: (string) @s
+        (#match? @s "['\\"]next/image['\\"]")
+    )
+)
+"""
+replace_node = "s"
+replace = "'next/legacy/image'"
+
+[[rules]]
+name = "find_and_replace_await_import_next_image"
+query = """
+    (await_expression
+        (call_expression
+            function: (import)
+            arguments: (arguments
+                (string) @s
+                (#match? @s "['\\"]next/image['\\"]")
+            )
+        )
+    )
+"""
+replace_node = "s"
+replace = "'next/legacy/image'"
+
+[[rules]]
+name = "find_and_replace_from_next_future_image"
+query = """
+(
+    (import_statement
+        (import_clause
+            (identifier) @i
+            (#eq? @i "Image")
+        )
+        source: (string) @s
+        (#match? @s "['\\"]next/future/image['\\"]")
+    )
+)
+"""
+replace_node = "s"
+replace = "'next/image'"
+
+[[rules]]
+name = "find_and_replace_await_import_next_future_image"
+query = """
+    (await_expression
+        (call_expression
+            function: (import)
+            arguments: (arguments
+                (string) @s
+                (#match? @s "['\\"]next/future/image['\\"]")
+            )
+        )
+    )
+"""
+replace_node = "s"
+replace = "'next/image'"
+
+[[rules]]
+name = "find_and_replace_require_next_image"
+query = """
+(
+    (call_expression
+        function: (identifier) @i
+        (#eq? @i "require")
+        arguments: (arguments
+            (string) @s
+            (#match? @s "['\\"]next/image['\\"]")
+        )
+    )
+)
+"""
+replace_node = "s"
+replace = "'next/legacy/image'"
+
+[[rules]]
+name = "find_and_replace_require_next_future_image"
+query = """
+(
+    (call_expression
+        function: (identifier) @i
+        (#eq? @i "require")
+        arguments: (arguments
+            (string) @s
+            (#match? @s "['\\"]next/future/image['\\"]")
+        )
+    )
+)
+"""
+replace_node = "s"
+replace = "'next/image'"
